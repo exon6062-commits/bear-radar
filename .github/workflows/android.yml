@@ -1,0 +1,34 @@
+name: Build Android APK
+on:
+  workflow_dispatch: # 讓主帥可以在網頁上手動點擊開工
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # 強行鎖定完美兼容的 Python 3.11 環境！
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython kivy==2.3.0
+
+      - name: Install Android SDK Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsqlite3-dev lldd openjdk-17-jdk unzip zip
+          
+      - name: Run Buildozer
+        run: buildozer -v android debug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BearRadar-APK
+          path: bin/*.apk
