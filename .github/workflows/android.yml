@@ -1,6 +1,6 @@
 name: Build Android APK
 on:
-  workflow_dispatch: # 讓主帥可以在網頁上手動點擊開工
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # 強行鎖定完美兼容的版本！
+          python-version: '3.11'
 
       - name: Install Dependencies
         run: |
@@ -23,19 +23,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libsqlite3-dev lld openjdk-17-jdk unzip zip
-          
-      - name: Auto Accept Android Licenses # 🛠️ 核心黑科技：全自動強行簽署 Android 所有授權協議！
-        run: |
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-          yes | wget --quiet https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip -q commandlinetools-linux-9477386_latest.zip -d cmdline-tools
-          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          # 強制向系統宣告老子同意所有條款
-          yes | ./cmdline-tools/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk --licenses || true
 
-      - name: Run Buildozer
-        run: buildozer -v android debug
+      - name: Run Buildozer (Force Accept Licenses)
+        # 🛠️ 核心一槍通關：直接用 yes | 強行灌進整條打包指令，遇到任何授權自動簽字！
+        run: yes | buildozer -v android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
