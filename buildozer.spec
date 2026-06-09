@@ -9,5 +9,5 @@ requirements = python3,kivy==2.3.0,websockets,aiohttp,beautifulsoup4,certifi
 orientation = portrait
 osx.kivy_version = 2.3.0
 fullscreen = 0
-android.archs = arm64-v8a
+android.archs = armeabi-v7a
 android.allow_backup = True
