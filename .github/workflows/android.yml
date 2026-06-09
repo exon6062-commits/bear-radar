@@ -1,28 +1,36 @@
 name: Build Android APK
-
 on:
-  workflow_dispatch: # 允許主帥在網頁上手動點火
+  workflow_dispatch:
 
 jobs:
-  build-android:
-    name: Build for Android
-    runs-on: ubuntu-latest
-
+  build:
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 🏆 Reddit 論壇極力推薦的黑科技插件：自動搞定 SDK / Aidl / 授權協議，絕不報錯
-      - name: Build with Buildozer Action
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
         with:
-          command: buildozer android debug
-          buildozer_version: stable
+          python-version: '3.11'
 
-      # 📦 成功後，自動把 APK 提取出來供主帥下載
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython kivy==2.3.0
+
+      - name: Install Android SDK & Kivy Core Packages
+        run: |
+          sudo apt-get update
+          # 🛠️ 一次過補齊所有 C 語言編譯必備庫（防範 Error code 1）
+          sudo apt-get install -y libsqlite3-dev lld openjdk-17-jdk unzip zip \
+            libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+
+      - name: Run Buildozer (Force Accept Licenses)
+        run: yes | buildozer -v android debug
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: BearRadar-APK
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: bin/*.apk
