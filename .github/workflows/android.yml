@@ -4,30 +4,20 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    # 🏆 直接借用官方早已打包好、環境絕對純淨且內置所有 C 語言工具鏈的 Docker 貨櫃
+    container:
+      image: kivy/buildozer:latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Dependencies
+      # 容器內已經自帶完美對齊的 Python、Java 與 SDK，直接開工，遇到協議自動回答 YES
+      - name: Run Buildozer
         run: |
-          pip install --upgrade pip
-          pip install buildozer cython kivy==2.3.0
-
-      - name: Install Android SDK & Kivy Core Packages
-        run: |
-          sudo apt-get update
-          # 🛠️ 一次過補齊所有 C 語言編譯必備庫（防範 Error code 1）
-          sudo apt-get install -y libsqlite3-dev lld openjdk-17-jdk unzip zip \
-            libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good
-
-      - name: Run Buildozer (Force Accept Licenses)
-        run: yes | buildozer -v android debug
+          id
+          yes | buildozer -v android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
